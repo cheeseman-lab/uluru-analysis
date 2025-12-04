@@ -83,3 +83,64 @@ sbs:
   cell_flow_threshold: 1
   cell_cellprob_threshold: 0
   cyto_model: cyto3
+phenotype:
+  foci_channel: null
+  channel_names:
+  - Hoescht
+  - COX4
+  - AGP
+  - ConA
+  align: null
+  dapi_index: 0
+  cyto_index: 2
+  segmentation_method: cellpose
+  reconcile: contained_in_cells
+  gpu: false
+  cp_method: cp_multichannel
+  mode: null
+  nuclei_diameter: 36.6
+  cell_diameter: 67.5
+  nuclei_flow_threshold: 0.4
+  nuclei_cellprob_threshold: 0.0
+  cell_flow_threshold: 1
+  cell_cellprob_threshold: 0
+  cyto_model: cyto3
+merge:
+  approach: fast
+  merge_combo_fp: config/merge_combo.tsv
+  sbs_metadata_cycle: 1
+  score: 0.1
+  threshold: 10
+  sbs_metadata_channel: null
+  ph_metadata_channel: null
+  alignment_flip_x: false
+  alignment_flip_y: false
+  sbs_dedup_prior:
+    fov_distance_0: true
+  pheno_dedup_prior:
+    mapped_single_gene: false
+    fov_distance_1: true
+  initial_sites:
+  - - 7
+    - 0
+  - - 97
+    - 5
+  - - 257
+    - 10
+  - - 282
+    - 15
+  - - 511
+    - 20
+  - - 537
+    - 25
+  - - 739
+    - 30
+  - - 718
+    - 35
+  - - 927
+    - 40
+  - - 953
+    - 45
+  det_range:
+  - 0.037
+  - 0.043

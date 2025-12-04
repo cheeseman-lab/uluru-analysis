@@ -1,8 +1,60 @@
 #!/bin/bash
 
-# Run only the preprocess rules
-snakemake --use-conda --cores all \
-    --snakefile "../brieflow/workflow/Snakefile" \
-    --configfile "config/config.yml" \
-    --rerun-triggers mtime \
-    --until all_preprocess -n
+# Log all output to a log file (stdout and stderr)
+mkdir -p logs
+start_time_formatted=$(date +%Y%m%d_%H%M%S)
+log_file="logs/preprocessing-${start_time_formatted}.log"
+exec > >(tee -a "$log_file") 2>&1
+
+# Start timing
+start_time=$(date +%s)
+
+# TODO: Set number of plates to process
+NUM_PLATES=2
+
+echo "===== STARTING SEQUENTIAL PROCESSING OF $NUM_PLATES PLATES ====="
+
+# Process each plate in sequence
+for PLATE in $(seq 1 $NUM_PLATES); do
+    echo ""
+    echo "==================== PROCESSING PLATE $PLATE ===================="
+    echo "Started at: $(date)"
+
+    # Start timing for this plate
+    plate_start_time=$(date +%s)
+
+    # Run only the preprocess rules
+    snakemake --use-conda --cores all \
+        --snakefile "../brieflow/workflow/Snakefile" \
+        --configfile "config/config.yml" \
+        --rerun-triggers mtime \
+        --until all_preprocess \
+        --rerun-incomplete \
+        --config plate_filter=$PLATE
+
+    # Check if Snakemake was successful
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Processing of plate $PLATE failed. Stopping sequential run."
+        exit 1
+    fi
+
+    # End timing and calculate duration for this plate
+    plate_end_time=$(date +%s)
+    plate_duration=$((plate_end_time - plate_start_time))
+
+    echo "==================== PLATE $PLATE COMPLETED ===================="
+    echo "Finished at: $(date)"
+    echo "Runtime for plate $PLATE: $((plate_duration / 3600))h $(((plate_duration % 3600) / 60))m $((plate_duration % 60))s"
+    echo ""
+
+    # Optional: Add a short pause between plates
+    sleep 10
+done
+
+# End timing and calculate total duration
+end_time=$(date +%s)
+duration=$((end_time - start_time))
+
+echo "===== ALL $NUM_PLATES PLATES PROCESSED SUCCESSFULLY ====="
+echo "Finished at: $(date)"
+echo "Total runtime: $((duration / 3600))h $(((duration % 3600) / 60))m $((duration % 60))s"
